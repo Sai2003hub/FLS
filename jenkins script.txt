@@ -1,0 +1,45 @@
+pipeline {
+    agent any  // Use any available Jenkins agent/node
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/your-repo-url.git'  // Replace with your GitHub repository URL
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t myapp:latest .'  // Build the Docker image
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    sh 'docker run -d --name myapp_container -p 80:80 myapp:latest'
+                }
+            }
+        }
+
+        stage('Test Application') {
+            steps {
+                script {
+                    // Simple test to check if the container is running and the app is accessible
+                    sh 'curl -f http://localhost:80 || exit 1'
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "Containerization succeeded and tests passed!"
+        }
+        failure {
+            echo "Containerization failed or tests failed!"
+        }
+    }
+}
